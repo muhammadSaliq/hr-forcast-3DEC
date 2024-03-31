@@ -38,7 +38,8 @@ const AllEmployee = () => {
 const [Alertedit, setAlertedit] = useState(false);
 const [results, setResults] = useState([]);
 const [resultbool, setresultbool] = useState(false);
-const [showbool, setshowbool] = useState(false)
+const [showbool, setshowbool] = useState(false);
+const [dialogOpen, setDialogOpen] = useState(false);
 
     const buttonStyle = {
         background: '#EC0C36',
@@ -108,7 +109,14 @@ const [showbool, setshowbool] = useState(false)
 
       //Search filter
       const [searchInput, setSearchInput] = useState('');
-      const [selectedOption, setSelectedOption] = useState('Any Department');
+      const [selectedOption, setSelectedOption] = useState('');
+      const [selectedOptionposition, setSelectedOptionposition] = useState('');
+      const [selectedOptiongender, setSelectedOptiongender] = useState('');
+      const [ageValue, setageValue] = useState('');
+      const [empIdValue, setempIDValue] = useState('');
+
+      
+
 
       //edit employee
 
@@ -157,6 +165,32 @@ let datetime = currDate + ' ' + currTime;
       // Event handler for select change
       const handleSelectChange = (event) => {
         setSelectedOption(event.target.value);
+      };
+
+      const handleSelectpositionChange = (event) => {
+        setSelectedOptionposition(event.target.value);
+      };
+      const handleSelectgenderChange = (event) => {
+        setSelectedOptiongender(event.target.value);
+      };
+
+      const handleAgeChange = (event) => {
+        setageValue(event.target.value);
+      };
+
+      const handleempIdChange = (event) => {
+        setempIDValue(event.target.value)
+      }
+
+      const handleClearFilters = () => {
+
+        setempIDValue('');
+        setageValue('');
+        setSelectedOption('');
+        setSelectedOptiongender('');
+        setSelectedOptionposition('');
+    
+
       };
 
 
@@ -238,6 +272,23 @@ let datetime = currDate + ' ' + currTime;
     }
   };
 
+  const imageStyle = {
+    width: '50px',
+    height: '50px',
+    marginLeft: '210px',
+    backgroundColor: '#f2f2f2',
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    padding: '10px',
+    borderRadius: '5px',
+  };
+    const handleImageClick = () => {
+      setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+      setDialogOpen(false);
+  };
+
     
 
     
@@ -284,6 +335,8 @@ let datetime = currDate + ' ' + currTime;
   }, [Delete , departmentBoolean ])
 
 // get user profile on load
+
+
     
 useEffect(() => {
 
@@ -319,11 +372,15 @@ useEffect(() => {
 const performSearch = async () => {
   if (selectedOption === "Any Department") {
     setSelectedOption("")
+
+    setDialogOpen(false)
   }
+
+
 
   try {
     const response = await axios.get(
-      `http://localhost:8000/api/searchlist?emloyeename=${searchInput}&Department=${selectedOption}`
+      `http://localhost:8000/api/searchlist?EmployeeNumber=${empIdValue}&Age=${ageValue}&JobRole=${selectedOptionposition}&Gender=${selectedOptiongender}&Department=${selectedOption}`
     );
     console.log("Search results: ", response.data);
     setResults(response.data);
@@ -334,6 +391,8 @@ const performSearch = async () => {
     console.log("Error in performing search: ", error);
   }
 };
+
+
 
     return (
         <>
@@ -497,53 +556,147 @@ const performSearch = async () => {
         <div className='rootcontainer2' style={{ backgroundColor: 'white' }}>
                 <h2 className="heado">Employees</h2>
             </div>
-          
-            <div className="grid md:grid-cols-5 md:gap-6 justify-center md:ml-30" style={{Width: '50%' , marginLeft: '30%'}} >
-    <div className="relative z-0 w-full mb-6 group flex justify-center">
+            {/* <div onClick={handleImageClick}>
+                <img src={filterimaage} alt="Filter" style={imageStyle} />
+            </div> */}
+            <div onClick={handleImageClick} style={{ display: 'flex', justifyContent: 'center', paddingRight: 'sm' }}>
+    <Button 
+        variant="contained" 
+        style={{
+          width: 'auto',
+          height: '50px',
+          borderRadius: '20%', // Makes the button fully rounded
+          backgroundColor: '#f0f0f0', // Light grey background color
+          color: '#000', // Black text color
+          marginBottom: '2%'
+      }}
+      
+      
+        onClick={handleImageClick}
+    >
+        Apply Filter
+    </Button>
+</div>
+
+<Dialog open={dialogOpen} onClose={handleCloseDialog}style={{ borderRadius: '20%' }}>
+            <DialogContent style={{ borderRadius: '20%' }}>
+    <h6 style={{ fontWeight: 'bold', marginBottom: '30px' }}>Apply Filters</h6>
+
+    <div className="relative z-0 w-full mb-6 group">
+    <div className="relative z-0 w-full mb-6 group">
     <input
-          type="text"
-          placeholder="Search..."
-          className="bg-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 block w-full p-2.5 0"
-          style={{ maxWidth: '300px', margin: '0 auto' }}
-          value={searchInput}
-          onChange={handleInputChange}
-        />
-    </div>
-    <div className="relative z-0 w-full mb-6 group flex justify-center">
-    <select
-          id="department"
-          name="department"
-          className="bg-gray-200 text-black text-sm rounded-lg focus:ring-blue-500  block w-full p-2.5 0"
-          style={{ maxWidth: '20', margin: '0 auto' }}
-          value={selectedOption}
-          onChange={handleSelectChange}
+        type="text"
+        id="emp-id"
+        name="emp-id"
+        placeholder="Employee ID"
+        value={empIdValue}
+        onChange={handleempIdChange}
+        style={{ 
+            width: '250px', 
+            height: '30px', 
+            margin: '0 auto',
+            border: '1px solid #333', // Dark grey border
+            borderRadius: '5px', // Rounded corners
+            fontSize: '14px', // Adjust font size
+      paddingLeft: '5px', // Add padding for the text
+        }}
+    />
+</div>
+
+<div className="relative z-0 w-full mb-6 group">
+    <input
+        type="text"
+        id="age"
+        name="age"
+        placeholder="Age"
+        value={ageValue}
+        onChange={handleAgeChange}
+        style={{ 
+            width: '250px', 
+            height: '30px', 
+            margin: '0 auto',
+            border: '1px solid #333', // Dark grey border
+            borderRadius: '5px', // Rounded corners
+            fontSize: '14px', // Adjust font size
+      paddingLeft: '5px', // Add padding for the text
+        }}
+    />
+</div>
+
+
+
+</div>
+    <div className="relative z-0 w-full mb-6 group">
+        <select
+            id="department"
+            name="department"
+            className="bg-gray-200 text-black text-sm rounded-lg focus:ring-blue-500 block w-full p-2.5 0"
+            style={{ maxWidth: '300px', margin: '0 auto' }}
+            value={selectedOption}
+            onChange={handleSelectChange}
         >
-       <option >Any Department</option>
-       {alldepartmentss.map((value) => (
-                            <option value={value.departmentname} >{value.departmentname}</option>
+            <option>Department</option>
+            {alldepartmentss.map((value) => (
+                <option value={value.departmentname}>{value.departmentname}</option>
+            ))}
+        </select>
+    </div>
+    <div className="relative z-0 w-full mb-6 group">
+        <select
+            id="position"
+            name="position"
+            className="bg-gray-200 text-black text-sm rounded-lg focus:ring-blue-500 block w-full p-2.5 0"
+            style={{ maxWidth: '300px', margin: '0 auto' }}
+            value={selectedOptionposition}
+            onChange={handleSelectpositionChange}
+        >
+            <option>Position</option>
+            <option>HR Department</option>
+            <option>Sales Executive</option>
+            {/* {alldepartmentss.map((value) => (
+                                <option value={value.departmentname}>{value.departmentname}</option>
+                            ))} */}
+        </select>
+    </div>
+    <div className="relative z-0 w-full mb-6 group">
+        <select
+            id="gender"
+            name="gender"
+            className="bg-gray-200 text-black text-sm rounded-lg focus:ring-blue-500 block w-full p-2.5 0"
+            style={{ maxWidth: '300px', margin: '0 auto' }}
+            value={selectedOptiongender}
+            onChange={handleSelectgenderChange}
+        >
+            <option>Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+    </div>
+  
 
-                ))}
-        {/* <option value="Employee">Through Department</option> */}
-        {/* <option value="Department">Through Name</option> */}
 
-</select>
+</DialogContent>
 
- </div>
+                <button
+          className="btnstylo ml-5 w-32 h-10 mb-2 text-sm bg-orange-500 text-white border border-black rounded-lg transition-colors duration-300 hover:bg-orange-600 focus:outline-none flex justify-center items-center"
+          style={{ margin: '0 auto', marginBottom: '5%' }}
+          onClick={performSearch}
+          
+        >
+          <FontAwesomeIcon icon={faSearch} className="mr-2" size="sm" />
+          Search
+        </button>
+        <button
+          className="btnstylo ml-5 w-32 h-10 mb-2 text-sm bg-orange-500 text-white border border-black rounded-lg transition-colors duration-300 hover:bg-orange-600 focus:outline-none flex justify-center items-center"
+          style={{ margin: '0 auto', marginBottom: '5%' }}
+          onClick={handleClearFilters} // Call the clear filters function on button click
+        >
+          {/* <FontAwesomeIcon icon={faSearch} className="mr-2" size="sm" /> */}
+          Clear
+        </button>
+            </Dialog>
 
- <button
-        className="btnstylo ml-5 w-32 h-10 mb-2 text-sm bg-orange-500 text-white border border-black rounded-lg transition-colors duration-300 hover:bg-orange-600 focus:outline-none flex justify-center items-center"
-        onClick={performSearch}
-      >
-        <FontAwesomeIcon icon={faSearch} className="mr-2" size="sm" />
-        Search
-      </button>
-
-
-
-
-
-
- </div>
+            
  <div className='pr-12 pl-12 md:pl-40 md:pr-40'>
  {results !== 0 ? (
           <ul className={`PrdouctSerchUl ${showbool ? "block" : "hidden"}`}>
@@ -557,8 +710,8 @@ const performSearch = async () => {
 
               <div className=''>
                 <span className="text-md font-bold">Name: {item.emloyeename}</span>
-                <span className="text-gray-600 ml-4">Age: £{item.Age}</span>
-                <span className="text-orange-600 ml-4">Department: £{item.Department}</span>
+                <span className="text-gray-600 ml-4">Age: {item.Age}</span>
+                <span className="text-orange-600 ml-4">Department: {item.Department}</span>
               </div>
               </Link>
             </li>
